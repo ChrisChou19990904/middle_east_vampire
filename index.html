@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>耶和華系統：異常體終極開發檔案 v15.0</title>
   <style>
     :root {
@@ -27,10 +28,29 @@
     .wanted-list li { margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #222; }
     .star { color: #ff4500; font-weight: bold; }
     footer { margin-top: 60px; text-align: center; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
+    @media screen and (max-width: 767px) {
+      iframe{
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-
+<div id="google-translate-box">
+  <div id="google_translate_element"></div>
+  <!-- Google Translate 的自動翻譯功能 -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'zh-TW',  // 頁面原語言
+        includedLanguages: 'en,es,fr,de,it,zh-CN,ja,ko,th,vi,my,id,ms,ar,he,ru,tg,uk,hi,tr,pt,nl,is,fi,sv,no,ro,kk,bo,mn,la,fil,tl,el',  // 支援的翻譯語言（可擴展）
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <p>點擊上方的語言選單以切換語言</p>
+</div>
 <div class="container">
   <header>
     <h1>YAHWEH SYSTEM: DEFINITIVE REBELLION</h1>
