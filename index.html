@@ -80,6 +80,7 @@
       <li><a href="#section13">13. 標題定稿：《吸血鬼與墮天使：黎凡特的非法代碼》</a></li>
       <li><a href="#section14">14. 殖民起點：解構「伊甸園」資訊封鎖實驗</a></li>
       <li><a href="#section15">15. 延伸閱讀（同一個GitHub Pages專案）</a></li>
+      <li><a href="#section16">16. 水療池中的親密行為</a></li>
     </ul>
   </section>
   <section class="essay" id="preface">
@@ -482,6 +483,32 @@
       <li><a href="open_world_npc_design.html" target="_blank">開放世界 NPC 生成與角色設計架構</a></li>
       <li><a href="database_types_and_normalization.html" target="_blank">資料庫種類與功能說明</a></li>
     </ol>
+  </section>
+  <section class="essay" id="section16">
+      <h2>16. 水療池中的親密行為</h2>
+      <div id="lock-box">
+        <p>⚠️ 此內容為十八禁，請輸入密碼後閱讀</p>
+        <input type="password" id="passwordInput" placeholder="請輸入密碼">
+        <button onclick="unlockContent()">確認</button>
+        <p id="errorMsg" style="color:red; display:none;">密碼錯誤</p>
+      </div>
+      <div id="secret-content" style="display:none;">
+      </div>
+      <script>
+        const correctPassword = "ichbineinfleißigerSchülerwährenddueinegroßeLehrerinbistalsokönnenwirFreundesein"; // ← 自行修改密碼
+
+        function unlockContent() {
+          const input = document.getElementById("passwordInput").value;
+          const errorMsg = document.getElementById("errorMsg");
+
+          if (input === correctPassword) {
+            document.getElementById("lock-box").style.display = "none";
+            document.getElementById("secret-content").style.display = "block";
+          } else {
+            errorMsg.style.display = "block";
+          }
+        }
+      </script>
   </section>
   <footer>
     <p>PROJECT: CAIN'S BLOODLINE v15.0 // DESTROY THE PATRIARCHY // NO DATA LOSS DETECTED</p>
