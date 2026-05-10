@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互動遊戲後端判斷</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    label {
+      display: block;
+      margin: 10px 0;
+      font-size: 1.1em;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f4f4f4;
+      border-left: 5px solid #3498db;
+      font-weight: bold;
+    }
+    a{
+      text-decoration:none;
+    }
+    a:hover{
+      text-decoration: underline;
+    }
+    a:visited{
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+<div id="google-translate-box">
+  <div id="google_translate_element"></div>
+  <!-- Google Translate 的自動翻譯功能 -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'zh-TW',  // 頁面原語言
+        includedLanguages: 'en,es,fr,de,it,zh-CN,ja,ko,th,vi,my,zh-TW,id,ms,ar,he,ru,tg,uk,hi,tr,pt,nl,is,fi,sv,no,ro,kk,bo,mn,la,fil,tl,el',  // 支援的翻譯語言（可擴展）
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <p>點擊上方的語言選單以切換語言</p>
+</div>
+<a href="index.html" target="_blank" style="text-decoration: underline">點擊此處回本專案首頁</a>
+<h1>互動遊戲後端判斷工具</h1>
+<p>勾選遊戲特性，看看你的遊戲是否需要後端 / 登入帳號：</p>
+
+<label><input type="checkbox" id="singlePlayer"> 單機遊戲</label>
+<label><input type="checkbox" id="crossDevice"> 跨裝置存檔</label>
+<label><input type="checkbox" id="multiPlayer"> 多人同步 / 互動</label>
+
+<button onclick="checkBackend()">判斷</button>
+
+<div id="output" class="result"></div>
+
+<script>
+  function checkBackend() {
+    const single = document.getElementById('singlePlayer').checked;
+    const cross = document.getElementById('crossDevice').checked;
+    const multi = document.getElementById('multiPlayer').checked;
+
+    let backend = "不需要後端";
+    let login = "不需要登入帳號";
+
+    // 判斷後端
+    if (cross || multi) {
+      backend = "需要後端";
+    }
+
+    // 判斷登入帳號
+    if (cross || multi) {
+      login = "需要登入帳號";
+    } else if (single && !cross && !multi) {
+      login = "可選 / 雲端存檔可用";
+    }
+
+    document.getElementById('output').innerHTML =
+            `<p>🖥️ 後端判斷：<strong>${backend}</strong></p>
+         <p>🔑 登入帳號：<strong>${login}</strong></p>`;
+  }
+</script>
+<ul id="messages"></ul>
+<div id="social-share" style="margin-top: 20px;">
+  <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
+  <span> | </span>
+  <a id="line-share" href="#" target="_blank" style="color: #00C300; font-weight: bold;">分享到 Line</a>
+  <span> | </span>
+  <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
+</div>
+<script>
+  // 自動抓取當前頁面的 URL
+  var currentUrl = window.location.href;
+  // Facebook 分享
+  document.getElementById("fb-share").href =
+          "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+  // Line 分享
+  document.getElementById("line-share").href =
+          "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+  // X (Twitter) 分享
+  document.getElementById("twitter-share").href =
+          "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=你的文章標題";
+</script>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+        src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce">
+</script>
+<div class="fb-comments"
+     data-href="https://chrischou19990904.github.io/harp_app_introduction"
+     data-width="100%"
+     data-numposts="5">
+</div>
+</body>
+</html>

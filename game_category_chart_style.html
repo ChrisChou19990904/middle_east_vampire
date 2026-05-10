@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲開發與後端教學（互動圖表版）</title>
+    <style>
+        body {
+            font-family: "Noto Sans TC", sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            max-width: 900px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        code {
+            background: #eee;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        blockquote {
+            border-left: 3px solid #3498db;
+            margin-left: 0;
+            padding-left: 10px;
+            color: #555;
+            font-style: italic;
+        }
+        ul {
+            margin-bottom: 1em;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        .tip {
+            background: #dff0d8;
+            border-left: 3px solid #27ae60;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #3498db;
+            color: #fff;
+        }
+        td.yes {
+            background-color: #27ae60;
+            color: white;
+            font-weight: bold;
+        }
+        td.no {
+            background-color: #e74c3c;
+            color: white;
+            font-weight: bold;
+        }
+        td.partial {
+            background-color: #f1c40f;
+            color: white;
+            font-weight: bold;
+        }
+        a{
+            text-decoration:none;
+        }
+        a:hover{
+            text-decoration: underline;
+        }
+        a:visited{
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+<div id="google-translate-box">
+    <div id="google_translate_element"></div>
+    <!-- Google Translate 的自動翻譯功能 -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'zh-TW',  // 頁面原語言
+                includedLanguages: 'en,es,fr,de,it,zh-CN,ja,ko,th,vi,my,zh-TW,id,ms,ar,he,ru,tg,uk,hi,tr,pt,nl,is,fi,sv,no,ro,kk,bo,mn,la,fil,tl,el',  // 支援的翻譯語言（可擴展）
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <p>點擊上方的語言選單以切換語言</p>
+</div>
+<a href="index.html" target="_blank" style="text-decoration: underline">點擊此處回本專案首頁</a>
+<h1>遊戲開發與後端教學（互動圖表版）</h1>
+
+<h2>一、遊戲分類與後端需求</h2>
+<p>市面上的遊戲可以粗略分成幾類：</p>
+
+<h3>遊戲類型 vs 是否需要後端 / 登入帳號</h3>
+<table>
+    <thead>
+    <tr>
+        <th>遊戲類型</th>
+        <th>是否單機</th>
+        <th>是否跨裝置</th>
+        <th>是否多人同步</th>
+        <th>是否需要後端</th>
+        <th>是否需要登入帳號</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>純前端小遊戲<br>(Dad N' Me、Dragon Fist 2)</td>
+        <td class="yes">是</td>
+        <td class="no">否</td>
+        <td class="no">否</td>
+        <td class="no">否</td>
+        <td class="no">否</td>
+    </tr>
+    <tr>
+        <td>單機開放世界 / 大型單機 RPG<br>(Skyrim、Zelda、GTA5 單機)</td>
+        <td class="yes">是</td>
+        <td class="partial">可選 / 雲端存檔</td>
+        <td class="no">否</td>
+        <td class="no">否</td>
+        <td class="partial">可選 / 雲端帳號</td>
+    </tr>
+    <tr>
+        <td>線上開放世界 / MMO / 手機課金遊戲<br>(GTA Online、原神)</td>
+        <td class="no">否</td>
+        <td class="yes">是</td>
+        <td class="yes">是</td>
+        <td class="yes">是</td>
+        <td class="yes">是</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="tip">
+    <strong>圖表解讀：</strong><br>
+    <span style="background:#27ae60;padding:2px 5px;">綠色 (yes)</span> → 必須 / 完全是<br>
+    <span style="background:#f1c40f;padding:2px 5px;">黃色 (partial)</span> → 可選 / 部分情況<br>
+    <span style="background:#e74c3c;padding:2px 5px;">紅色 (no)</span> → 不需要
+</div>
+
+<h2>二、後端存在的原因</h2>
+<blockquote>
+    後端的存在是為了確保遊戲的「狀態主控權不在玩家手上」，<br>
+    而不是單純因為「遊戲世界大」或「進度多」。
+</blockquote>
+
+<h2>三、資料庫選擇概述</h2>
+<ul>
+    <li>SQL（MySQL / MariaDB / PostgreSQL / Oracle）：結構化資料、課金、排行榜</li>
+    <li>NoSQL（MongoDB / Redis / Cassandra / DynamoDB）：高並發、即時遊戲狀態、分散式需求</li>
+    <li>混合架構：核心資料用 SQL，快取 / 排行 / session 用 Redis，物品/地圖/任務可能用自定義儲存</li>
+</ul>
+
+<h2>四、判斷是否需要後端的三個問題</h2>
+<ol>
+    <li>玩家能否修改存檔？</li>
+    <li>玩家之間會互相影響嗎？</li>
+    <li>公司是否需控制經濟 / 排行 / 防作弊？</li>
+</ol>
+<p>如果全部否 → 不需要後端；任一是 → 一定要後端</p>
+<ul id="messages"></ul>
+<div id="social-share" style="margin-top: 20px;">
+    <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
+    <span> | </span>
+    <a id="line-share" href="#" target="_blank" style="color: #00C300; font-weight: bold;">分享到 Line</a>
+    <span> | </span>
+    <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
+</div>
+<script>
+    // 自動抓取當前頁面的 URL
+    var currentUrl = window.location.href;
+    // Facebook 分享
+    document.getElementById("fb-share").href =
+        "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+    // Line 分享
+    document.getElementById("line-share").href =
+        "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+    // X (Twitter) 分享
+    document.getElementById("twitter-share").href =
+        "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=你的文章標題";
+</script>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+        src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce">
+</script>
+<div class="fb-comments"
+     data-href="https://chrischou19990904.github.io/harp_app_introduction"
+     data-width="100%"
+     data-numposts="5">
+</div>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料庫架構與正規化分析 - 《神權崩壞》技術文檔</title>
+    <style>
+        body {
+            font-family: "Noto Sans TC", "微軟正黑體", sans-serif;
+            line-height: 1.8;
+            margin: 20px auto;
+            max-width: 950px;
+            background-color: #f4f4f4;
+            color: #222;
+        }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; margin-top: 40px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ccc; padding: 12px; text-align: left; }
+        th { background-color: #3498db; color: white; }
+
+        /* 開發者風格代碼區塊 */
+        code {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            display: block;
+            line-height: 1.6;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-left: 5px solid #d4af37;
+        }
+        .tip {
+            background: #e8f5e9;
+            border-left: 5px solid #2e7d32;
+            padding: 15px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left: 5px solid #f57c00;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        a { text-decoration: none; color: #3498db; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div id="google-translate-box">
+    <div id="google_translate_element"></div>
+    <!-- Google Translate 的自動翻譯功能 -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'zh-TW',  // 頁面原語言
+                includedLanguages: 'en,es,fr,de,it,zh-CN,ja,ko,th,vi,my,zh-TW,id,ms,ar,he,ru,tg,uk,hi,tr,pt,nl,is,fi,sv,no,ro,kk,bo,mn,la,fil,tl,el',  // 支援的翻譯語言（可擴展）
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <p>點擊上方的語言選單以切換語言</p>
+</div>
+<a href="index.html" target="_blank" style="text-decoration: underline">回本GitHub Pages專案首頁</a>
+<h1>資料庫種類與功能說明</h1>
+
+<h2>1. 關聯式資料庫 (Relational Database)</h2>
+<p>以表格形式存資料，強調資料一致性 (ACID)。適合金融、訂單、ERP 系統。</p>
+<table>
+    <tr>
+        <th>資料庫</th>
+        <th>功能/特點</th>
+    </tr>
+    <tr>
+        <td>MySQL</td>
+        <td>開源、支援 SQL 查詢、適合中小型網站</td>
+    </tr>
+    <tr>
+        <td>PostgreSQL</td>
+        <td>支援複雜查詢、ACID、擴展性強</td>
+    </tr>
+    <tr>
+        <td>Oracle Database</td>
+        <td>企業級關聯式資料庫，強一致性、穩定可靠</td>
+    </tr>
+    <tr>
+        <td>Microsoft SQL Server</td>
+        <td>企業應用、整合微軟生態系統</td>
+    </tr>
+</table>
+
+<h2>2. 分散式 / NoSQL 資料庫</h2>
+<p>資料分散在多台伺服器，支援高並發與水平擴展，部分資料庫採用最終一致性。</p>
+<table>
+    <tr>
+        <th>資料庫</th>
+        <th>功能/特點</th>
+    </tr>
+    <tr>
+        <td>MongoDB</td>
+        <td>文件型資料庫 (Document DB)，適合存 JSON 結構資料</td>
+    </tr>
+    <tr>
+        <td>Redis</td>
+        <td>快取資料庫，支援即時訊息、排行榜、計數器</td>
+    </tr>
+    <tr>
+        <td>Cassandra</td>
+        <td>高可用、分散式，適合大數據與高流量應用</td>
+    </tr>
+    <tr>
+        <td>DynamoDB</td>
+        <td>AWS 提供的 NoSQL，易水平擴展、免維護伺服器</td>
+    </tr>
+    <tr>
+        <td>TiDB</td>
+        <td>分散式關聯式資料庫，支援 SQL 與水平擴展</td>
+    </tr>
+</table>
+
+<h2>3. 遊戲開發中的資料庫應用場景</h2>
+<p>根據遊戲規模與營運需求，開發者會選擇單一或混合式的資料架構：</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>遊戲規模</th>
+        <th>資料存儲方案</th>
+        <th>應用細節</th>
+        <th>核心目的</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><strong>純單機遊戲</strong></td>
+        <td>Local Storage / 存檔文件</td>
+        <td>.json, .dat 或 SQLite 存於玩家本機。</td>
+        <td>零延遲、無需伺服器成本。</td>
+    </tr>
+    <tr>
+        <td><strong>多人 / 雲端服務</strong></td>
+        <td>混合架構 (SQL + NoSQL)</td>
+        <td><strong>SQL:</strong> 帳號、課金、商城交易。<br><strong>NoSQL:</strong> 好友清單、即時訊息。</td>
+        <td>確保交易安全並提升社交互動速度。</td>
+    </tr>
+    <tr>
+        <td><strong>大型開放世界 (MMO)</strong></td>
+        <td>複合架構 (SQL + Redis + 快取)</td>
+        <td><strong>SQL:</strong> 核心數據存檔。<br><strong>Redis:</strong> 全球排行榜、玩家坐標快取。</td>
+        <td>在高並發下維持數據一致性與讀取效能。</td>
+    </tr>
+    </tbody>
+</table>
+
+
+
+[Image of basic client-server game architecture]
+
+
+<div class="tip">
+    <strong>架構思維：</strong> 在遊戲實務中，「混合架構」是業界標準。我們利用 SQL 的 ACID 特性保護玩家資產（如虛擬貨幣），利用 Redis 的記憶體讀取特性處理每秒數萬次的戰鬥狀態更新。
+</div>
+
+<section>
+    <h2>4. 資料庫正規化實戰：以「非法代碼」主角群為例</h2>
+    <p>正規化（Normalization）是整理資料結構的方法，目的是減少冗餘、避免更新異常。在本作中，我們將角色屬性視為「系統代碼」，演釋如何透過正規化管理這些異常樣本。</p>
+
+    <h3>初始狀態 (未正規化 - 0NF)</h3>
+    <p>將生理屬性與多項能力塞入同一表，導致欄位違反原子性。例如沙德同時擁有「隱身」與「血能爆發」，多個值依賴於單一欄位。</p>
+    <code>
+        -- 冗餘嚴重，且無法精準篩選特定能力的個體
+        CREATE TABLE Entity_Raw (
+        Name VARCHAR(20), -- 沙德, 札菲爾, Nephilim-01
+        Species VARCHAR(20), -- 吸血鬼, 墮天使, 混血巨人
+        Abilities TEXT, -- "隱身, 血能操控" (違反原子性)
+        Constraints TEXT, -- "紫外線脆弱, 核心代碼鎖死"
+        Height_cm INT, -- 183, 210, 210
+        CanFly BOOLEAN
+        );</code>
+
+    <h3>第一正規化 (1NF) - 原子性 (Atomicity)</h3>
+    <p>確保每個欄位不可再分。將 <b>Nephilim</b> 的多項戰鬥規格拆分為獨立紀錄。</p>
+    <code>
+        CREATE TABLE Entity_1NF (
+        EntityID INT,
+        EntityName VARCHAR(20),
+        AbilityName VARCHAR(50), -- 彈跳力, 紫外線脈衝, 十噸怪力
+        PRIMARY KEY (EntityID, AbilityName)
+        );</code>
+
+    <h3>第二正規化 (2NF) - 消除部分依賴</h3>
+    <p>確保非主鍵欄位完全依賴於主鍵。將角色的「基礎資料」與「戰鬥能力」拆分，避免重複記錄身高資訊。</p>
+    <code>
+        -- 實體主表 (基礎物理標尺)
+        CREATE TABLE Entities_2NF (
+        EntityID INT PRIMARY KEY,
+        EntityName VARCHAR(20),
+        Height_cm INT -- 沙德 183 / 札菲爾 210 / Nephilim 210
+        );
+
+        -- 能力關聯表
+        CREATE TABLE EntityAbilities_2NF (
+        EntityID INT,
+        AbilityName VARCHAR(50),
+        PRIMARY KEY (EntityID, AbilityName)
+        );</code>
+
+    <h3>第三正規化 (3NF) - 消除傳遞依賴</h3>
+    <p>非主鍵欄位不可依賴於其他非主鍵欄位。在你的設定中，生理特徵（排泄、汗腺、繁殖力）取決於<b>物種類型</b>而非特定個體。</p>
+
+    <code>
+        -- 1. 物種系統定義表 (定義不同代碼類型的底層限制)
+        CREATE TABLE SpeciesCodeProtocol (
+        SpeciesType VARCHAR(20) PRIMARY KEY,
+        CanSweat BOOLEAN,     -- 札菲爾(墮天使)具有人體特徵
+        CanExcrete BOOLEAN,   -- 沙德(吸血鬼)代謝極低
+        HasFertility BOOLEAN  -- Nephilim(混血)被鎖死生殖代碼
+        );
+
+        -- 2. 角色權限表
+        CREATE TABLE Characters_3NF (
+        CharacterID INT PRIMARY KEY,
+        CharacterName VARCHAR(20),
+        SpeciesType VARCHAR(20),
+        FOREIGN KEY (SpeciesType) REFERENCES SpeciesCodeProtocol(SpeciesType)
+        );</code>
+
+    <h3>第四正規化 (4NF) - 消除多值依賴</h3>
+    <p>以<b>札菲爾 (Zaphir)</b> 為例：將互不相關的多值資訊（持有的「非法技術」與「系統弱點」）徹底拆分，避免資料組合爆炸。</p>
+
+    <code>
+        -- 1. 非法技術表 (札菲爾掌握的古代代碼)
+        CREATE TABLE IllegalTech (
+        CharacterID INT,
+        TechName VARCHAR(50), -- 符號重組, 氣象干擾
+        PRIMARY KEY (CharacterID, TechName)
+        );
+
+        -- 2. 系統弱點表 (耶和華系統針對該個體的後門)
+        CREATE TABLE SystemVulnerabilities (
+        CharacterID INT,
+        WeaknessName VARCHAR(50), -- 波動拳干擾, 區域格式化
+        PRIMARY KEY (CharacterID, WeaknessName)
+        );</code>
+
+    <h3>第五正規化 (5NF) - 投影連接正規化</h3>
+    <p>處理三方循環關聯：例如「特定的 **Nephilim**」在「特定的 **通緝等級**」下，獲准使用的「特定 **UV 武裝**」。確保這些關聯被拆分後，仍能精確還原執法邏輯。</p>
+</section>
+
+<section>
+    <h2>5. 結論：開發者的技術權衡 (Trade-off)</h2>
+    <div class="warning">
+        「過度正規化會增加 JOIN 的運算開銷，影響讀取效能。」
+    </div>
+    <p>在實際開發中，我們通常遵循 <strong>3NF / 4NF</strong>。但在處理高頻率讀取的即時數值時，會適度採用<strong>反正規化 (Denormalization)</strong>，以空間換取時間，確保遊戲運行流暢。</p>
+</section>
+<ul id="messages"></ul>
+<div id="social-share" style="margin-top: 20px;">
+    <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
+    <span> | </span>
+    <a id="line-share" href="#" target="_blank" style="color: #00C300; font-weight: bold;">分享到 Line</a>
+    <span> | </span>
+    <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
+</div>
+<script>
+    // 自動抓取當前頁面的 URL
+    var currentUrl = window.location.href;
+    // Facebook 分享
+    document.getElementById("fb-share").href =
+        "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+    // Line 分享
+    document.getElementById("line-share").href =
+        "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+    // X (Twitter) 分享
+    document.getElementById("twitter-share").href =
+        "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=你的文章標題";
+</script>
+</body>
+</html>

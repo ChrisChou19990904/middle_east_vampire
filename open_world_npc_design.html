@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>開放世界 NPC 生成與角色設計說明文件</title>
+    <style>
+        body {
+            font-family: Arial, "Noto Sans TC", sans-serif;
+            line-height: 1.8;
+            background-color: #eee;
+            color: #111;
+            margin: 40px;
+        }
+        h1, h2, h3 {
+            color: #d4af37;
+        }
+        h1 {
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        section {
+            margin-bottom: 50px;
+        }
+        .box {
+            background: #1c1c1c;
+            padding: 20px;
+            border-left: 4px solid #d4af37;
+            margin: 20px 0;
+            color: #eee;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #222;
+            color: #d4af37;
+        }
+        a{
+            text-decoration:none;
+        }
+        a:hover{
+            text-decoration: underline;
+        }
+        a:visited{
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+<div id="google-translate-box">
+    <div id="google_translate_element"></div>
+    <!-- Google Translate 的自動翻譯功能 -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'zh-TW',  // 頁面原語言
+                includedLanguages: 'en,es,fr,de,it,zh-CN,ja,ko,th,vi,my,zh-TW,id,ms,ar,he,ru,tg,uk,hi,tr,pt,nl,is,fi,sv,no,ro,kk,bo,mn,la,fil,tl,el',  // 支援的翻譯語言（可擴展）
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <p>點擊上方的語言選單以切換語言</p>
+</div>
+<a href="index.html" target="_blank" style="text-decoration: underline">回本GitHub Pages專案首頁</a>
+<h1>開放世界 NPC 生成與角色設計架構</h1>
+
+<section>
+    <h2>一、NPC 生成系統設計</h2>
+
+    <p>在開放世界遊戲中，NPC 通常不會永久存在，而是透過「物件池（Object Pool）」或「區塊重置機制」進行管理。</p>
+
+    <h3>1. 物件池機制（Object Pooling）</h3>
+    <div class="box">
+        <p>流程範例：</p>
+        <ol>
+            <li>玩家進入區域</li>
+            <li>系統從 NPC 池中取出角色物件</li>
+            <li>套用隨機外觀參數</li>
+            <li>指派 AI 行為（巡邏、聊天、交易等）</li>
+            <li>死亡或距離過遠 → 回收至池中</li>
+            <li>下次重新設定外觀再使用</li>
+        </ol>
+    </div>
+
+    <p>優點：</p>
+    <ul>
+        <li>節省記憶體</li>
+        <li>避免頻繁建立與銷毀物件</li>
+        <li>維持城市人口密度</li>
+    </ul>
+
+    <hr>
+
+    <h3>2. 區塊重置（Zone Reset）</h3>
+    <p>適合效能有限的平台（如手機）：</p>
+    <ul>
+        <li>區域為獨立場景</li>
+        <li>玩家離開 → 整個區域卸載</li>
+        <li>再次進入 → 全部重建</li>
+    </ul>
+
+    <p>缺點是容易產生「NPC 原地復活」的假感。</p>
+
+</section>
+
+<section>
+    <h2>二、模組化角色生成系統</h2>
+
+    <p>你不需要建立幾十種完整模型，而是應該使用「模組化組合系統」。</p>
+
+    <h3>建議架構：</h3>
+
+    <ul>
+        <li>男女共用骨架各 1 套</li>
+        <li>5–8 種臉部基底</li>
+        <li>10–20 種髮型</li>
+        <li>20 套服裝</li>
+        <li>Shader 控制膚色、傷痕、污漬</li>
+    </ul>
+
+    <div class="box">
+        <p>組合示例：</p>
+        <p>8 臉型 × 15 髮型 × 20 服裝 = 2400 種視覺變化</p>
+        <p>實際資產量可能不到 60 個模型</p>
+    </div>
+
+</section>
+
+<section>
+    <h2>三、角色分層設計（Hero vs NPC）</h2>
+
+    <table>
+        <tr>
+            <th>類型</th>
+            <th>建議精度</th>
+            <th>說明</th>
+        </tr>
+        <tr>
+            <td>主角群</td>
+            <td>高精度手工雕刻</td>
+            <td>獨立臉部模型、高解析貼圖、表情動畫</td>
+        </tr>
+        <tr>
+            <td>重要反派</td>
+            <td>中高精度</td>
+            <td>特殊服裝與辨識度</td>
+        </tr>
+        <tr>
+            <td>一般 NPC</td>
+            <td>模組化組合</td>
+            <td>隨機生成，避免重複</td>
+        </tr>
+    </table>
+
+</section>
+
+<section>
+    <h2>四、最低資產量方案（中型專案建議）</h2>
+
+    <ul>
+        <li>2 套骨架（男女）</li>
+        <li>8 臉型</li>
+        <li>12 髮型</li>
+        <li>20 服裝</li>
+        <li>3 種膚色範圍</li>
+        <li>隨機疤痕與汙漬貼圖</li>
+    </ul>
+
+    <p>目標是：</p>
+    <div class="box">
+        <p>不要讓玩家看出生成規則。</p>
+    </div>
+
+</section>
+
+<section>
+    <h2>五、設計核心原則總結</h2>
+
+    <ul>
+        <li>主角精雕，路人模組化</li>
+        <li>避免臉型 = 陣營的絕對對應</li>
+        <li>使用權重系統避免連續重複</li>
+        <li>建立人口密度管理系統</li>
+        <li>加入短期記憶避免立即重生假象</li>
+    </ul>
+
+</section>
+
+<section>
+    <h2>六、案例對照：Gangstar Vegas vs Grand Theft Auto V</h2>
+
+    <p>對比兩款知名開放世界遊戲，我們可以看出 NPC 系統設計和專業差距：</p>
+
+    <table>
+        <tr>
+            <th>項目</th>
+            <th>Gangstar Vegas</th>
+            <th>Grand Theft Auto V</th>
+        </tr>
+        <tr>
+            <td>路人 NPC 外觀</td>
+            <td>長相類型有限，經常看到同一張臉重複出現</td>
+            <td>大量臉型和髮型組合，隨機生成，重複感低</td>
+        </tr>
+        <tr>
+            <td>店內 NPC</td>
+            <td>改版後多為固定角色，不再隨機生成</td>
+            <td>店內 NPC 與室外 NPC 一樣隨機生成，每次進出可不同</td>
+        </tr>
+        <tr>
+            <td>NPC 死亡與復活</td>
+            <td>離開店鋪不到幾秒後，之前被擊殺的 NPC 原封不動復活</td>
+            <td>死亡 NPC 物件回收後，重新生成新外觀和組合，降低重複感</td>
+        </tr>
+        <tr>
+            <td>主角與環境互動的真實感</td>
+            <td>有限，重複路人和固定店員容易產生假感</td>
+            <td>高，NPC 生成多樣化，互動環境更自然</td>
+        </tr>
+        <tr>
+            <td>開發專業度</td>
+            <td>中小規模，受資源限制，NPC 模組化較簡單</td>
+            <td>3A 級開發，物件池、隨機生成、模組化外觀及行為 AI 專業度高</td>
+        </tr>
+    </table>
+
+    <div class="box">
+        <p>結論：GTA5 在 NPC 生成系統上更專業，可提供更真實的城市感和互動體驗；Gangstar Vegas 則因模組與生成數量有限，玩家容易察覺重複和假感。</p>
+    </div>
+
+</section>
+
+<section>
+    <h2>七、NPC 生成流程示意圖</h2>
+
+    <p>下圖展示了兩款遊戲在 NPC 生成流程上的差異：</p>
+
+    <div style="display:flex; gap:40px; flex-wrap:wrap; margin-top:20px;">
+
+        <!-- Gangstar Vegas 流程 -->
+        <div style="flex:1; min-width:300px; background:#1c1c1c; color: #eee; padding:20px; border-left:4px solid #d4af37;">
+            <h3 style="color:#d4af37;">Gangstar Vegas</h3>
+            <ul>
+                <li>玩家進入區域</li>
+                <li>從有限 NPC 類型取角色</li>
+                <li>套用固定外觀或少量組合</li>
+                <li>指派簡單 AI 行為</li>
+                <li>NPC 死亡 → 原地快速復活</li>
+                <li>下一次進入區域 → 角色幾乎一樣</li>
+            </ul>
+        </div>
+
+        <!-- GTA5 流程 -->
+        <div style="flex:1; min-width:300px; background:#1c1c1c; color: #eee; padding:20px; border-left:4px solid #d4af37;">
+            <h3 style="color:#d4af37;">Grand Theft Auto V</h3>
+            <ul>
+                <li>玩家進入區域</li>
+                <li>系統從大型物件池取角色</li>
+                <li>隨機套用臉型、髮型、服裝組合</li>
+                <li>指派複雜 AI 行為（巡邏、互動、逃跑等）</li>
+                <li>NPC 死亡 → 回收至物件池</li>
+                <li>再次生成 NPC → 可能新外觀、新行為，降低重複感</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="box" style="margin-top:20px;">
+        <p>結論：GTA5 的流程能維持更高真實感，避免玩家察覺 NPC 重複，Gangstar Vegas 因外觀與行為受限，假感明顯。</p>
+    </div>
+
+</section>
+<section>
+    <h2>八、為何 Gangstar Vegas 與 Grand Theft Auto V 存在明顯技術差距？</h2>
+
+    <p>兩款遊戲在 NPC 系統與真實感上的差距，並非單純「技術好壞」，而是來自平台定位、資源規模與設計目標的根本不同。</p>
+
+    <table>
+        <tr>
+            <th>比較面向</th>
+            <th>Gangstar Vegas</th>
+            <th>Grand Theft Auto V</th>
+        </tr>
+
+        <tr>
+            <td>主要平台</td>
+            <td>手機（iOS / Android）</td>
+            <td>主機與 PC（PS、Xbox、Windows）</td>
+        </tr>
+
+        <tr>
+            <td>硬體資源</td>
+            <td>記憶體與 CPU/GPU 受限</td>
+            <td>高記憶體、高效能 CPU/GPU</td>
+        </tr>
+
+        <tr>
+            <td>開發規模</td>
+            <td>中型專案</td>
+            <td>3A 級大型專案</td>
+        </tr>
+
+        <tr>
+            <td>開發成本</td>
+            <td>數百萬美元等級</td>
+            <td>數億美元等級</td>
+        </tr>
+
+        <tr>
+            <td>NPC 模組數量</td>
+            <td>臉型與外觀模組有限</td>
+            <td>大量模組與權重系統控制重複率</td>
+        </tr>
+
+        <tr>
+            <td>AI 行為系統</td>
+            <td>簡化版巡邏與反應機制</td>
+            <td>多層行為樹與事件觸發系統</td>
+        </tr>
+
+        <tr>
+            <td>區域管理方式</td>
+            <td>區塊重置為主</td>
+            <td>大型物件池 + 動態串流系統</td>
+        </tr>
+    </table>
+
+    <div class="box">
+        <p><strong>核心差異關鍵：</strong></p>
+        <ul>
+            <li>手機平台必須優先考慮「效能與電量消耗」</li>
+            <li>主機/PC 可承載更高模組數量與 AI 計算量</li>
+            <li>預算決定資產量（臉型、服裝、動畫數量）</li>
+            <li>開發時間長短影響系統成熟度</li>
+        </ul>
+    </div>
+
+    <h3>1️⃣ 平台差異（Mobile vs Console/PC）</h3>
+    <p>
+        手機遊戲必須在 2–8GB 記憶體內運行，同時避免過熱與耗電過快。
+        因此 NPC 數量、外觀模組、AI 複雜度都必須大幅簡化。
+    </p>
+
+    <p>
+        而主機與 PC 可使用更大的記憶體與更強 GPU，
+        允許同時存在大量 NPC、複雜動畫與高解析貼圖。
+    </p>
+
+    <h3>2️⃣ 資產製作成本差異</h3>
+    <p>
+        GTA5 擁有龐大的角色美術團隊，
+        可以製作數十種臉型、上百種服裝與大量動作捕捉動畫。
+    </p>
+
+    <p>
+        手機遊戲若嘗試同樣規模，檔案體積將過大，
+        下載門檻與設備需求會直接提高，影響市場。
+    </p>
+
+    <h3>3️⃣ 技術成熟度差異</h3>
+    <p>
+        GTA5 使用成熟的物件池管理、權重隨機系統、
+        人口密度控制與動態串流技術。
+    </p>
+
+    <p>
+        Gangstar Vegas 為了確保流暢度，
+        選擇較簡化的重置與固定 NPC 策略，
+        因此容易產生「原地復活」與「臉型重複」的假感。
+    </p>
+
+    <div class="box">
+        <p><strong>結論：</strong></p>
+        <p>
+            這不是單純「誰比較用心」，
+            而是平台定位、預算規模、技術深度與設計取向的結果。
+        </p>
+    </div>
+
+</section>
+<ul id="messages"></ul>
+<div id="social-share" style="margin-top: 20px;">
+    <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
+    <span> | </span>
+    <a id="line-share" href="#" target="_blank" style="color: #00C300; font-weight: bold;">分享到 Line</a>
+    <span> | </span>
+    <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
+</div>
+<script>
+    // 自動抓取當前頁面的 URL
+    var currentUrl = window.location.href;
+    // Facebook 分享
+    document.getElementById("fb-share").href =
+        "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+    // Line 分享
+    document.getElementById("line-share").href =
+        "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+    // X (Twitter) 分享
+    document.getElementById("twitter-share").href =
+        "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=你的文章標題";
+</script>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+        src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce">
+</script>
+<div class="fb-comments"
+     data-href="https://chrischou19990904.github.io/harp_app_introduction"
+     data-width="100%"
+     data-numposts="5">
+</div>
+<footer>
+    <hr>
+    <p>文件用途：開放世界中世紀奇幻專案 - NPC 與角色生成架構說明</p>
+</footer>
+
+</body>
+</html>
