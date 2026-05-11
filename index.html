@@ -726,6 +726,36 @@
       <li><a href="database_types_and_normalization.html" target="_blank">資料庫種類與功能說明</a></li>
     </ol>
   </section>
+  <ul id="messages"></ul>
+  <div id="social-share" style="margin-top: 20px;">
+    <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
+    <span> | </span>
+    <a id="line-share" href="#" target="_blank" style="color: #00C300; font-weight: bold;">分享到 Line</a>
+    <span> | </span>
+    <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
+  </div>
+  <script>
+    // 自動抓取當前頁面的 URL
+    var currentUrl = window.location.href;
+    // Facebook 分享
+    document.getElementById("fb-share").href =
+            "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+    // Line 分享
+    document.getElementById("line-share").href =
+            "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+    // X (Twitter) 分享
+    document.getElementById("twitter-share").href =
+            "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=你的文章標題";
+  </script>
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous"
+          src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce">
+  </script>
+  <div class="fb-comments"
+       data-href="https://chrischou19990904.github.io/harp_app_introduction"
+       data-width="100%"
+       data-numposts="5">
+  </div>
   <footer>
     <p>PROJECT: CAIN'S BLOODLINE v15.0 // DESTROY THE PATRIARCHY // NO DATA LOSS DETECTED</p>
   </footer>
