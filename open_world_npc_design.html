@@ -2,7 +2,8 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>開放世界 NPC 生成與角色設計說明文件</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開放世界 NPC 生成與角色設計說明文件 - 《黎凡特的非法代碼》技術文檔</title>
     <style>
         body {
             font-family: Arial, "Noto Sans TC", sans-serif;
@@ -32,6 +33,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background: #fff;
         }
         th, td {
             border: 1px solid #444;
@@ -42,8 +44,17 @@
             background-color: #222;
             color: #d4af37;
         }
+        code {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
         a{
             text-decoration:none;
+            color: #3498db;
+            font-weight: bold;
         }
         a:hover{
             text-decoration: underline;
@@ -73,319 +84,161 @@
 <h1>開放世界 NPC 生成與角色設計架構</h1>
 
 <section>
-    <h2>一、NPC 生成系統設計</h2>
+    <h2>一、NPC 生成系統設計與效能防禦（Object Pooling）</h2>
 
-    <p>在開放世界遊戲中，NPC 通常不會永久存在，而是透過「物件池（Object Pool）」或「區塊重置機制」進行管理。</p>
+    <p>在本作 10 世紀黎凡特開放世界中，為實作<b>「全地圖古建築 100% 室內外無縫自由進出（Full Interior Accessibility）」</b>並拒絕空氣牆阻抗，系統摒棄了高負載的區域重置（Zone Reset）壞軌，全盤採用高級<b>「物件池（Object Pool）」動態串流機制</b>進行動態記憶體防禦（RAM Budget Control）。</p>
 
-    <h3>1. 物件池機制（Object Pooling）</h3>
+    <h3>1. 物件池動態映射流程：</h3>
     <div class="box">
-        <p>流程範例：</p>
+        <p><b>執行矩陣範例：</b></p>
         <ol>
-            <li>玩家進入區域</li>
-            <li>系統從 NPC 池中取出角色物件</li>
-            <li>套用隨機外觀參數</li>
-            <li>指派 AI 行為（巡邏、聊天、交易等）</li>
-            <li>死亡或距離過遠 → 回收至池中</li>
-            <li>下次重新設定外觀再使用</li>
+            <li><b>視錐與距離偵測：</b> 主角沙德（183cm）或札菲爾（210cm）以極速移動或掠行接近特定綠洲、清真寺或豪宅半徑 300 公尺。</li>
+            <li><b>池化喚醒（Active Stream）：</b> 系統免除 <code>Instantiate</code> 記憶體開銷，直接從本機暫存池取出休眠的 <code>GameObject</code> 基底。</li>
+            <li><b>扇區基因鎖定：</b> 自動注入唯一的<b>西亞高加索人種（West Asian Caucasoid）</b>遺傳特徵代碼。</li>
+            <li><b>AI 權限指派：</b> 根據當前系統通緝星級（1 星宗教糾察隊至 3 星聖戰重騎兵），即時改寫 AI 行為樹，並於骨架節點動態掛載鍍銀匕首、法器或攻城機組。</li>
+            <li><b>記憶體回收（Recycle Buffer）：</b> NPC 被擊殺、格式化或距離玩家超過動態掃描半徑 → 抹除狀態數據，回收至暫存池，強制執行短期記憶緩衝，防止如 <i>Gangstar Vegas</i> 般的「原地快速復活/同一張臉連續重生」之假感。</li>
         </ol>
     </div>
 
-    <p>優點：</p>
+    <p><b>技術優點：</b></p>
     <ul>
-        <li>節省記憶體</li>
-        <li>避免頻繁建立與銷毀物件</li>
-        <li>維持城市人口密度</li>
+        <li><b>記憶體零耗損：</b> 避免頻繁建立與銷毀物件產生的 CPU 垃圾回收（GC Alloc）卡頓，確保 Mobile 與 PC 平台流暢度。</li>
+        <li><b>100% 室內外動態穿梭：</b> NPC 可隨沙德破窗或追擊至水療池室內，不觸發任何過場載入畫面（Zero Loading Screen）。</li>
     </ul>
-
-    <hr>
-
-    <h3>2. 區塊重置（Zone Reset）</h3>
-    <p>適合效能有限的平台（如手機）：</p>
-    <ul>
-        <li>區域為獨立場景</li>
-        <li>玩家離開 → 整個區域卸載</li>
-        <li>再次進入 → 全部重建</li>
-    </ul>
-
-    <p>缺點是容易產生「NPC 原地復活」的假感。</p>
-
 </section>
 
 <section>
-    <h2>二、模組化角色生成系統</h2>
+    <h2>二、模組化角色隨機生成系統</h2>
 
-    <p>你不需要建立幾十種完整模型，而是應該使用「模組化組合系統」。</p>
+    <p>為在滿足大眾審美觀（Modern Aesthetics）的同時優化美術資產，本作不堆砌死板的單一模型，而是採用<b>「分層模組化隨機權重組合方案」</b>。利用底層 Shader 控制環境變量，在有限資產下渲染出極高多樣性的人口密度。</p>
 
-    <h3>建議架構：</h3>
-
+    <h3>黎凡特扇區資產模板（西亞高加索白人變體規格）：</h3>
     <ul>
-        <li>男女共用骨架各 1 套</li>
-        <li>5–8 種臉部基底</li>
-        <li>10–20 種髮型</li>
-        <li>20 套服裝</li>
-        <li>Shader 控制膚色、傷痕、污漬</li>
+        <li><b>共用動畫骨架：</b> 成年男性骨架 1 套（基礎身高參考現代標準）、成年女性骨架 1 套（提供視覺仰視沙德 183cm 的標尺對比）。</li>
+        <li><b>遺傳特徵基底（8 臉型 × 12 髮型）：</b> 剔除其餘扇區特徵，鎖定深邃五官的高加索骨架。髮型均為烏黑長髮或中東編髮。</li>
+        <li><b>服裝分層（20 套黎凡特古典服飾）：</b> 包含 Abaya、長袍、紗麗與信徒聖裝，具備分層物理碰撞。</li>
+        <li><b>Shader 動態矩陣：</b> 控制麥色/橄欖色肌膚色階範圍（抵禦西亞紫外線）、深褐色/深棕色虹膜防禦、隨機疤痕與沙漠污漬貼圖。</li>
     </ul>
 
     <div class="box">
-        <p>組合示例：</p>
-        <p>8 臉型 × 15 髮型 × 20 服裝 = 2400 種視覺變化</p>
-        <p>實際資產量可能不到 60 個模型</p>
+        <p><b>組合演算法（Combinatorial Math）：</b></p>
+        <p>8 臉型 × 12 髮型 × 20 服裝 × 3 肌膚防禦色階 = <b>5,760 種視覺非重複變化</b></p>
+        <p>實際美術核心資產量少於 50 個，以極致的資料結構設計實作豐富的城市感。</p>
     </div>
-
 </section>
 
 <section>
-    <h2>三、角色分層設計（Hero vs NPC）</h2>
+    <h2>三、角色分層設計與審美主權（Hero vs NPC）</h2>
+
+    <p>遵從現代商業遊戲開發正典（借鑑《暮光之城》沃爾圖里領袖與《惡魔城》德古拉之審美重塑邏輯），本作將角色精度劃分為三個權限階級，將大眾市場審美視為最高開發主權：</p>
 
     <table>
+        <thead>
         <tr>
-            <th>類型</th>
-            <th>建議精度</th>
-            <th>說明</th>
+            <th>權限階級</th>
+            <th>物理與審美規格 (Aesthetic Specifications)</th>
+            <th>技術實作細節</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><strong>主角群 (Hero Units)</strong></td>
+            <td>高精度手工雕刻。<b>沙德 (183cm / D罩杯 / 18°C 冷循環)</b>、<b>札菲爾 (210cm / 黑色殘破羽翼)</b>。展現超模比例與古典黑袍的神祕威壓。</td>
+            <td>獨立高骨骼面數、4K PBR 貼圖、全套面部表情動畫（Blendshapes）與獨立血能代謝/感官覺醒系統代碼。</td>
         </tr>
         <tr>
-            <td>主角群</td>
-            <td>高精度手工雕刻</td>
-            <td>獨立臉部模型、高解析貼圖、表情動畫</td>
+            <td><strong>神權執法官 (Boss Units)</strong></td>
+            <td>中高精度。<b>最高管理員耶和華 (226cm / 打赤膊煙白鬚長者)</b>、<b>大天使加百列 (220cm / 純白等離子翼)</b>、<b>混血巨人 Nephilim (210cm)</b>。</td>
+            <td>特殊環境交互 Shader。5 星通緝下，加百列模型超頻加載天氣管理、雷電導電鏈與高壓水主權（液壓手術刀）的粒子特效（VFX）。</td>
         </tr>
         <tr>
-            <td>重要反派</td>
-            <td>中高精度</td>
-            <td>特殊服裝與辨識度</td>
+            <td><strong>一般 NPC / 執法弓箭手</strong></td>
+            <td>模組化隨機組合。遵循 10 世紀西亞高加索凡人標準。</td>
+            <td>動態套用物件池隨機權重，掛載常規武裝與鍍銀抑制法器，充當主角伟力的降維打擊樣本。</td>
         </tr>
-        <tr>
-            <td>一般 NPC</td>
-            <td>模組化組合</td>
-            <td>隨機生成，避免重複</td>
-        </tr>
+        </tbody>
     </table>
-
 </section>
 
 <section>
-    <h2>四、最低資產量方案（中型專案建議）</h2>
+    <h2>四、案例對照：Gameloft《孤膽車神：維加斯》 vs Rockstar《俠盜獵車手 V》</h2>
 
-    <ul>
-        <li>2 套骨架（男女）</li>
-        <li>8 臉型</li>
-        <li>12 髮型</li>
-        <li>20 服裝</li>
-        <li>3 種膚色範圍</li>
-        <li>隨機疤痕與汙漬貼圖</li>
-    </ul>
-
-    <p>目標是：</p>
-    <div class="box">
-        <p>不要讓玩家看出生成規則。</p>
-    </div>
-
-</section>
-
-<section>
-    <h2>五、設計核心原則總結</h2>
-
-    <ul>
-        <li>主角精雕，路人模組化</li>
-        <li>避免臉型 = 陣營的絕對對應</li>
-        <li>使用權重系統避免連續重複</li>
-        <li>建立人口密度管理系統</li>
-        <li>加入短期記憶避免立即重生假象</li>
-    </ul>
-
-</section>
-
-<section>
-    <h2>六、案例對照：Gangstar Vegas vs Grand Theft Auto V</h2>
-
-    <p>對比兩款知名開放世界遊戲，我們可以看出 NPC 系統設計和專業差距：</p>
+    <p>透過解構兩款開放世界題材的 NPC 系統，能精準洞察手遊平台的「妥協壞軌」與 3A 正典的「技術差距」，進而論證本作定錨 10 世紀古代黎凡特的必然性：</p>
 
     <table>
+        <thead>
         <tr>
-            <th>項目</th>
-            <th>Gangstar Vegas</th>
-            <th>Grand Theft Auto V</th>
+            <th>架構維度</th>
+            <th>孤膽車神：維加斯 (Gangstar Vegas)</th>
+            <th>俠盜獵車手 V (Grand Theft Auto V)</th>
+            <th>本作決策：《黎凡特的非法代碼》</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><strong>環境互動真實感</strong></td>
+            <td>改版後將店內 NPC 改為僵死固定角色。建築外觀繁複，為省記憶體將九成大樓變為<b>無法進入的靜態死物件（Static Meshes）</b>，空氣牆假感嚴重。</td>
+            <td>店內外 NPC 統一隨機動態生成，每次進出皆具備不同組合，城市生態具備流暢讀取與高互動性。</td>
+            <td><b>降維勝出：</b> 退回 10 世紀冷兵器時代，利用沉穩大氣的古典幾何結構降低渲染開銷，<b>實作全地圖建築 100% 室內外自由進出與全面破壞。</b></td>
         </tr>
         <tr>
-            <td>路人 NPC 外觀</td>
-            <td>長相類型有限，經常看到同一張臉重複出現</td>
-            <td>大量臉型和髮型組合，隨機生成，重複感低</td>
+            <td><strong>NPC 死亡與回收</strong></td>
+            <td>記憶體緩衝區（Buffer）缺失。玩家擊殺 NPC 後離開店鋪不到數秒，該 NPC 原封不動在原位「原地復活」，產生嚴重的代碼錯亂假象。</td>
+            <td>死亡或消失之 NPC 立即回收至大型物件池，重新打散參數，再次生成時變更外觀與行為，大幅降低重複率。</td>
+            <td><b>完全採用 3A 物件池：</b> NPC 死亡或脫離視錐後徹底回收，並<b>加入短期空間記憶緩衝</b>，拒絕原地復活，維持沙漠綠洲與古城的歷史厚重感。</td>
         </tr>
         <tr>
-            <td>店內 NPC</td>
-            <td>改版後多為固定角色，不再隨機生成</td>
-            <td>店內 NPC 與室外 NPC 一樣隨機生成，每次進出可不同</td>
+            <td><strong>科技與奇幻的審美違和</strong></td>
+            <td>現代都市犯罪題材，滿街為跑車、直升機、機槍等工業載具。</td>
+            <td>純粹現代世俗凡人秩序，依賴反恐裝甲車與警力進行物理圍剿。</td>
+            <td><b>格式化 GTA 標籤：</b> 堅決拒絕現代。若在充滿戰鬥機、坦克的現代世界塞入大天使，將引發嚴重的<b>敘事邏輯違和與科技代碼排斥</b>。選在 10 世紀冷兵器時空，讓大天使加百列的「天氣主權」直接降維打擊古代弓箭手與駱駝騎兵，才能釋放最純粹的宗教窒息感，確立獨立品牌主權。</td>
         </tr>
-        <tr>
-            <td>NPC 死亡與復活</td>
-            <td>離開店鋪不到幾秒後，之前被擊殺的 NPC 原封不動復活</td>
-            <td>死亡 NPC 物件回收後，重新生成新外觀和組合，降低重複感</td>
-        </tr>
-        <tr>
-            <td>主角與環境互動的真實感</td>
-            <td>有限，重複路人和固定店員容易產生假感</td>
-            <td>高，NPC 生成多樣化，互動環境更自然</td>
-        </tr>
-        <tr>
-            <td>開發專業度</td>
-            <td>中小規模，受資源限制，NPC 模組化較簡單</td>
-            <td>3A 級開發，物件池、隨機生成、模組化外觀及行為 AI 專業度高</td>
-        </tr>
+        </tbody>
     </table>
-
-    <div class="box">
-        <p>結論：GTA5 在 NPC 生成系統上更專業，可提供更真實的城市感和互動體驗；Gangstar Vegas 則因模組與生成數量有限，玩家容易察覺重複和假感。</p>
-    </div>
-
 </section>
 
 <section>
-    <h2>七、NPC 生成流程示意圖</h2>
-
-    <p>下圖展示了兩款遊戲在 NPC 生成流程上的差異：</p>
+    <h2>五、NPC 執法與生成流程示意圖</h2>
+    <p>下圖展示了不同架構在玩家觸發追捕（通緝系統）與日常生存時的底層運算邏輯：</p>
 
     <div style="display:flex; gap:40px; flex-wrap:wrap; margin-top:20px;">
 
         <!-- Gangstar Vegas 流程 -->
-        <div style="flex:1; min-width:300px; background:#1c1c1c; color: #eee; padding:20px; border-left:4px solid #d4af37;">
-            <h3 style="color:#d4af37;">Gangstar Vegas</h3>
+        <div style="flex:1; min-width:300px; background:#1c1c1c; color: #eee; padding:20px; border-left:4px solid #e74c3c;">
+            <h3 style="color:#e74c3c;">Gangstar Vegas (手遊妥協架構)</h3>
             <ul>
-                <li>玩家進入區域</li>
-                <li>從有限 NPC 類型取角色</li>
-                <li>套用固定外觀或少量組合</li>
-                <li>指派簡單 AI 行為</li>
-                <li>NPC 死亡 → 原地快速復活</li>
-                <li>下一次進入區域 → 角色幾乎一樣</li>
+                <li>玩家進入現代都市區域</li>
+                <li>從極度有限的固定 NPC 類型中提取角色</li>
+                <li>環境大樓全面鎖死，淪為無法進出的靜態死物件</li>
+                <li>指派單一行為樹（驚嚇、常規巡邏）</li>
+                <li>NPC 死亡 → 緩衝區缺失，原地快速原樣復活</li>
+                <li>再次進入區域 → 撞上嚴重空氣牆，重置感明顯</li>
             </ul>
         </div>
 
-        <!-- GTA5 流程 -->
-        <div style="flex:1; min-width:300px; background:#1c1c1c; color: #eee; padding:20px; border-left:4px solid #d4af37;">
-            <h3 style="color:#d4af37;">Grand Theft Auto V</h3>
+        <!-- 本作：黎凡特的非法代碼 流程 -->
+        <div style="flex:1; min-width:300px; background:#1c1c1c; color: #eee; padding:20px; border-left:4px solid #27ae60;">
+            <h3 style="color:#27ae60;">黎凡特的非法代碼 (3A 效能優化架構)</h3>
             <ul>
-                <li>玩家進入區域</li>
-                <li>系統從大型物件池取角色</li>
-                <li>隨機套用臉型、髮型、服裝組合</li>
-                <li>指派複雜 AI 行為（巡邏、互動、逃跑等）</li>
-                <li>NPC 死亡 → 回收至物件池</li>
-                <li>再次生成 NPC → 可能新外觀、新行為，降低重複感</li>
+                <li>玩家接近 10 世紀古典豪宅 / 廢墟扇區</li>
+                <li>系統免除 <code>Instantiate</code> 開銷，直接調度動態物件池</li>
+                <li><b>自動編碼：</b> 隨機套用西亞高加索人種（麥色肌膚/黑髮）隨機權重</li>
+                <li><b>空間解鎖：</b> 允許 NPC 隨沙德無縫破窗進出半室外水療池與室內</li>
+                <li><b>通緝觸發（1-5星）：</b> 依序改寫 AI，1星注入鍍銀匕首，5星超頻加載大天使加百列之導電鏈雷擊與高壓水主權</li>
+                <li><b>負熵回收：</b> 異常體死亡或脫離視錐 → 清空數據回收，掛載短期空間記憶緩衝，杜絕原地復活</li>
             </ul>
         </div>
-
     </div>
-
-    <div class="box" style="margin-top:20px;">
-        <p>結論：GTA5 的流程能維持更高真實感，避免玩家察覺 NPC 重複，Gangstar Vegas 因外觀與行為受限，假感明顯。</p>
-    </div>
-
 </section>
+
 <section>
-    <h2>八、為何 Gangstar Vegas 與 Grand Theft Auto V 存在明顯技術差距？</h2>
-
-    <p>兩款遊戲在 NPC 系統與真實感上的差距，並非單純「技術好壞」，而是來自平台定位、資源規模與設計目標的根本不同。</p>
-
-    <table>
-        <tr>
-            <th>比較面向</th>
-            <th>Gangstar Vegas</th>
-            <th>Grand Theft Auto V</th>
-        </tr>
-
-        <tr>
-            <td>主要平台</td>
-            <td>手機（iOS / Android）</td>
-            <td>主機與 PC（PS、Xbox、Windows）</td>
-        </tr>
-
-        <tr>
-            <td>硬體資源</td>
-            <td>記憶體與 CPU/GPU 受限</td>
-            <td>高記憶體、高效能 CPU/GPU</td>
-        </tr>
-
-        <tr>
-            <td>開發規模</td>
-            <td>中型專案</td>
-            <td>3A 級大型專案</td>
-        </tr>
-
-        <tr>
-            <td>開發成本</td>
-            <td>數百萬美元等級</td>
-            <td>數億美元等級</td>
-        </tr>
-
-        <tr>
-            <td>NPC 模組數量</td>
-            <td>臉型與外觀模組有限</td>
-            <td>大量模組與權重系統控制重複率</td>
-        </tr>
-
-        <tr>
-            <td>AI 行為系統</td>
-            <td>簡化版巡邏與反應機制</td>
-            <td>多層行為樹與事件觸發系統</td>
-        </tr>
-
-        <tr>
-            <td>區域管理方式</td>
-            <td>區塊重置為主</td>
-            <td>大型物件池 + 動態串流系統</td>
-        </tr>
-    </table>
-
-    <div class="box">
-        <p><strong>核心差異關鍵：</strong></p>
-        <ul>
-            <li>手機平台必須優先考慮「效能與電量消耗」</li>
-            <li>主機/PC 可承載更高模組數量與 AI 計算量</li>
-            <li>預算決定資產量（臉型、服裝、動畫數量）</li>
-            <li>開發時間長短影響系統成熟度</li>
-        </ul>
+    <h2>六、技術權衡總結（Trade-off & Verification）</h2>
+    <div class="box" style="border-left-color: #27ae60;">
+        <p><b>技術總結：</b></p>
+        <p>本作將故事背景鎖定於 10 世紀黎凡特，名義上是人文神學的解構，實質上是一場高明的<b>「空間工程與硬體效能防禦戰術」</b>。利用古典中東建築的幾何優勢，徹底格式化現代題材的記憶體炸裂危機（RAM Overload），並在完全不需要現代工業載具的干擾下，讓沙德與札菲爾的個體超能力越獄，實作了兼具 3A 級 100% 空間存取（Full Interior Accessibility）與純粹宗教史詩感的邏輯閉環開發藍圖。</p>
     </div>
-
-    <h3>1️⃣ 平台差異（Mobile vs Console/PC）</h3>
-    <p>
-        手機遊戲必須在 2–8GB 記憶體內運行，同時避免過熱與耗電過快。
-        因此 NPC 數量、外觀模組、AI 複雜度都必須大幅簡化。
-    </p>
-
-    <p>
-        而主機與 PC 可使用更大的記憶體與更強 GPU，
-        允許同時存在大量 NPC、複雜動畫與高解析貼圖。
-    </p>
-
-    <h3>2️⃣ 資產製作成本差異</h3>
-    <p>
-        GTA5 擁有龐大的角色美術團隊，
-        可以製作數十種臉型、上百種服裝與大量動作捕捉動畫。
-    </p>
-
-    <p>
-        手機遊戲若嘗試同樣規模，檔案體積將過大，
-        下載門檻與設備需求會直接提高，影響市場。
-    </p>
-
-    <h3>3️⃣ 技術成熟度差異</h3>
-    <p>
-        GTA5 使用成熟的物件池管理、權重隨機系統、
-        人口密度控制與動態串流技術。
-    </p>
-
-    <p>
-        Gangstar Vegas 為了確保流暢度，
-        選擇較簡化的重置與固定 NPC 策略，
-        因此容易產生「原地復活」與「臉型重複」的假感。
-    </p>
-
-    <div class="box">
-        <p><strong>結論：</strong></p>
-        <p>
-            這不是單純「誰比較用心」，
-            而是平台定位、預算規模、技術深度與設計取向的結果。
-        </p>
-    </div>
-
 </section>
+
 <ul id="messages"></ul>
 <div id="social-share" style="margin-top: 20px;">
     <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
@@ -395,31 +248,18 @@
     <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
 </div>
 <script>
-    // 自動抓取當前頁面的 URL
     var currentUrl = window.location.href;
-    // Facebook 分享
-    document.getElementById("fb-share").href =
-        "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
-    // Line 分享
-    document.getElementById("line-share").href =
-        "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
-    // X (Twitter) 分享
-    document.getElementById("twitter-share").href =
-        "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=你的文章標題";
+    document.getElementById("fb-share").href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+    document.getElementById("line-share").href = "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+    document.getElementById("twitter-share").href = "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=開放世界NPC生成與角色設計架構";
 </script>
 <div id="fb-root"></div>
-<script async defer crossorigin="anonymous"
-        src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce">
-</script>
-<div class="fb-comments"
-     data-href="https://chrischou19990904.github.io/harp_app_introduction"
-     data-width="100%"
-     data-numposts="5">
-</div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce"></script>
+<div class="fb-comments" data-href="https://chrischou19990904.github.io/harp_app_introduction" data-width="100%" data-numposts="5"></div>
+
 <footer>
     <hr>
-    <p>文件用途：開放世界黎凡特奇幻專案 - NPC 與角色生成架構說明</p>
+    <p>PROJECT: CAIN'S BLOODLINE v15.0 // TECHNICAL SPECIFICATION // NO MEMORY LEAK DETECTED</p>
 </footer>
-
 </body>
 </html>
