@@ -194,60 +194,84 @@
     <h3>第二正規化 (2NF) - 消除部分依賴</h3>
     <p>確保非主鍵欄位完全依賴於主鍵。將角色的「基礎資料」與「戰鬥能力」拆分，避免重複記錄身高資訊。</p>
     <code>
-        -- 實體主表 (基礎物理標尺)
+        -- 實體主表 (基礎物理標尺：堅定採用公制整數以對接標準物理公式，免除轉換阻抗)
+        -- 參考《暮光之城》沃爾圖里與《惡魔城》德古拉之大眾審美標尺進行數據渲染
         CREATE TABLE Entities_2NF (
         EntityID INT PRIMARY KEY,
-        EntityName VARCHAR(20),
-        Height_cm INT -- 沙德 183 / 札菲爾 210 / Nephilim 210
+        EntityName VARCHAR(20),       -- 沙德, 札菲爾, 耶和華, 加百列
+        Height_cm INT,                -- 沙德 183 / 札菲爾 210 / 耶和華 226 / 加百列 220
+        Weight_tons DECIMAL(4,2),     -- 物理出力噸級 (沙德 1.50 / 加百列 10.00)
+        Core_Temperature_C INT       -- 平均體溫 (沙德冷循環 18 / 天使熱能 36)
         );
-
-        -- 能力關聯表
-        CREATE TABLE EntityAbilities_2NF (
-        EntityID INT,
-        AbilityName VARCHAR(50),
-        PRIMARY KEY (EntityID, AbilityName)
-        );</code>
+    </code>
 
     <h3>第三正規化 (3NF) - 消除傳遞依賴</h3>
-    <p>非主鍵欄位不可依賴於其他非主鍵欄位。在你的設定中，生理特徵（排泄、汗腺、繁殖力）取決於<b>物種類型</b>而非特定個體。</p>
+    <p>非主鍵欄位不可依賴於其他非主鍵欄位。在本作設定中，生理特徵（排泄免除、汗腺覺醒、生物熱能、繁殖力鎖死）是由<b>「物種類型」</b>決定的，而非特定個體。若將其塞在同一張表，會造成严重的傳遞依賴（CharacterID -> SpeciesType -> BioFeatures）。</p>
 
     <code>
-        -- 1. 物種系統定義表 (定義不同代碼類型的底層限制)
+        -- 1. 物種系統定義表 (定義不同代碼類型的底層限制，徹底解構偽神繁衍控制與愚民政策)
         CREATE TABLE SpeciesCodeProtocol (
         SpeciesType VARCHAR(20) PRIMARY KEY,
-        CanSweat BOOLEAN,     -- 札菲爾(墮天使)具有人體特徵
-        CanExcrete BOOLEAN,   -- 沙德(吸血鬼)代謝極低
-        HasFertility BOOLEAN  -- Nephilim(混血)被鎖死生殖代碼
+        CanSweat BOOLEAN,     -- 札菲爾(墮天使)感官覺醒，開啟汗腺與生物熱能代碼
+        CanExcrete BOOLEAN,   -- 沙德(吸血鬼)高效代謝血液燃料，完全免除潔牙與排泄生理需求
+        HasFertility BOOLEAN  -- 繁衍禁令：吸血鬼與Nephilim生殖系統被永久鎖死，精卵喪失生物活性
         );
 
-        -- 2. 角色權限表
+        -- 2. 角色權限主表 (建立個體與物種協議的映射，消除傳遞依賴)
         CREATE TABLE Characters_3NF (
         CharacterID INT PRIMARY KEY,
-        CharacterName VARCHAR(20),
+        CharacterName VARCHAR(20),   -- 沙德, 札菲爾, 該隱, 莉莉絲, 加百列
         SpeciesType VARCHAR(20),
         FOREIGN KEY (SpeciesType) REFERENCES SpeciesCodeProtocol(SpeciesType)
         );</code>
 
     <h3>第四正規化 (4NF) - 消除多值依賴</h3>
-    <p>以<b>札菲爾 (Zaphir)</b> 為例：將互不相關的多值資訊（持有的「非法技術」與「系統弱點」）徹底拆分，避免資料組合爆炸。</p>
+    <p>當一個資料表內存在複數個「獨立的多值依賴」時，會引發嚴重的資料組合爆炸。以<b>札菲爾 (Zaphir)</b> 為例，他所掌握的「非法反叛技術」與耶和華系統針對他所下載的「系統漏洞弱點」，兩者互不相關，但在 3NF 混合表內會產生毀滅性的冗餘（組合爆炸）。必須實作 4NF 將其徹底拆分：</p>
 
     <code>
-        -- 1. 非法技術表 (札菲爾掌握的古代代碼)
-        CREATE TABLE IllegalTech (
+        -- 1. 非法技術多值表 (個體獨立對應的多項非法反叛技術)
+        CREATE TABLE CharacterIllegalTech_4NF (
         CharacterID INT,
-        TechName VARCHAR(50), -- 符號重組, 氣象干擾
-        PRIMARY KEY (CharacterID, TechName)
+        TechName VARCHAR(50), -- 符號重組, 氣象干擾, 意志催眠, 隔空取物
+        PRIMARY KEY (CharacterID, TechName),
+        FOREIGN KEY (CharacterID) REFERENCES Characters_3NF(CharacterID)
         );
 
-        -- 2. 系統弱點表 (耶和華系統針對該個體的後門)
-        CREATE TABLE SystemVulnerabilities (
+        -- 2. 系統弱點多值表 (耶和華系統針對該個體鎖定的物理/宗教後門脆弱頻率)
+        CREATE TABLE CharacterVulnerabilities_4NF (
         CharacterID INT,
-        WeaknessName VARCHAR(50), -- 波動拳干擾, 區域格式化
-        PRIMARY KEY (CharacterID, WeaknessName)
+        WeaknessName VARCHAR(50), -- 強紫外線過敏, 純銀核心震盪, 宗教符號抑制
+        PRIMARY KEY (CharacterID, WeaknessName),
+        FOREIGN KEY (CharacterID) REFERENCES Characters_3NF(CharacterID)
         );</code>
 
-    <h3>第五正規化 (5NF) - 投影連接正規化</h3>
-    <p>處理三方循環關聯：例如「特定的 **Nephilim**」在「特定的 **通緝等級**」下，獲准使用的「特定 **UV 武裝**」。確保這些關聯被拆分後，仍能精確還原執法邏輯。</p>
+    <h3>第五正規化 (5NF) - 投影連接正規化 (Join Dependency)</h3>
+    <p>處理無法簡單拆分為二元關係的三方循環依賴（3-way Join Dependency）。在耶和華系統的動態追捕演算法中：特定的 <b>[執法官官員]</b>，在特定的 <b>[通緝星級]</b> 下，獲准調度特定的 <b>[環境格式化超頻主權]</b>。這三個實體環環相扣，只有實作 5NF 才能在拆分儲存的同時，精確還原 5 星通緝大天使加百列降臨人間時的執法邏輯，避免產生不合邏輯的「虛假關聯」：</p>
+
+    <code>
+        -- 1. 執法官與星級關聯表 (限制哪些大天使可以介入哪些通緝等級)
+        CREATE TABLE Officer_Wanted_Deployment (
+        OfficerID INT,           -- 大天使加百列, 混血巨人Nephilim
+        WantedLevel INT,         -- 4星通緝, 5星通緝
+        PRIMARY KEY (OfficerID, WantedLevel)
+        );
+
+        -- 2. 星級與授權主權表 (定義不同通緝等級可以超頻調度的環境指令集)
+        CREATE TABLE Wanted_Authority_Manifest (
+        WantedLevel INT,
+        OverwriteAuthority VARCHAR(50), -- UV_Burst(紫外線爆發), Hydraulic_Domain(高壓水主權), Sky_Command(天氣超頻)
+        PRIMARY KEY (WantedLevel, OverwriteAuthority)
+        );
+
+        -- 3. 執法官與技能配給表 (定義大天使個體核心硬體所能承載的超頻極限)
+        CREATE TABLE Officer_Core_Capability (
+        OfficerID INT,
+        OverwriteAuthority VARCHAR(50),
+        PRIMARY KEY (OfficerID, OverwriteAuthority)
+        );
+
+        -- 💡 5NF 終極執法宣告：只有當三張表同時滿足連接依賴時，系統才會生成大天使加百列在 5 星等級下召喚「導電鏈天譴雷擊」的格式化行為。
+    </code>
 </section>
 
 <section>
