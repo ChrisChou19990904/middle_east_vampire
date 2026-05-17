@@ -73,22 +73,21 @@
 
     let backend = "不需要後端";
     let login = "不需要登入帳號";
+    let devNote = "";
 
-    // 判斷後端
     if (cross || multi) {
       backend = "需要後端";
-    }
-
-    // 判斷登入帳號
-    if (cross || multi) {
       login = "需要登入帳號";
+      devNote = "💡 這是標準的線上混合架構（如原神、GTA Online），需要處理高並發與防作弊演算法。";
     } else if (single && !cross && !multi) {
       login = "可選 / 雲端存檔可用";
+      devNote = "🦅 <b>正典架構：</b>就如同《吸血鬼與墮天使：黎凡特的非法代碼》，拒絕現代都市的靜態死物件與 GTA 標籤，在 10 世紀冷兵器時空實作 100% 空間存取，純單機本機存檔即可完美運行！";
     }
 
     document.getElementById('output').innerHTML =
             `<p>🖥️ 後端判斷：<strong>${backend}</strong></p>
-         <p>🔑 登入帳號：<strong>${login}</strong></p>`;
+             <p>🔑 登入帳號：<strong>${login}</strong></p>
+             <p style="font-size:0.9em; color:#555; border-top:1px solid #ccc; padding-top:10px;">${devNote}</p>`;
   }
 </script>
 <ul id="messages"></ul>
