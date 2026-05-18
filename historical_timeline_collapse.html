@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>歷史時間軸塌陷與遊戲開發優化報告</title>
+  <style>
+    :root {
+      --bg-color: #1a1613;
+      --card-bg: #26201b;
+      --text-color: #e6dfd5;
+      --accent-gold: #c5a059;
+      --accent-red: #8e2b2b;
+      --border-color: #3d332a;
+    }
+    body {
+      font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      border-bottom: 2px solid var(--accent-gold);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    h1 {
+      color: var(--accent-gold);
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+    h2 {
+      color: var(--accent-gold);
+      border-left: 4px solid var(--accent-red);
+      padding-left: 12px;
+      margin-top: 30px;
+    }
+    h3 {
+      color: #d1b88a;
+      margin-top: 20px;
+    }
+    p, li {
+      font-size: 1.05rem;
+      color: #ccc2b3;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border-color);
+      margin: 30px 0;
+    }
+    .blockquote {
+      background-color: #211b17;
+      border-left: 4px solid var(--accent-gold);
+      padding: 15px;
+      margin: 20px 0;
+      font-style: italic;
+    }
+    .highlight {
+      color: var(--accent-gold);
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: var(--card-bg);
+    }
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #332a24;
+      color: var(--accent-gold);
+    }
+    ul {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .code-annotation {
+      background-color: #110d0b;
+      color: #a8ffb2;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+    a{
+      text-decoration:none;
+      color: #3498db;
+      font-weight: bold;
+    }
+    a:hover{
+      text-decoration: underline;
+    }
+    a:visited{
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div id="google-translate-box">
+    <div id="google_translate_element"></div>
+    <!-- Google Translate 的自動翻譯功能 -->
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'zh-TW',  // 頁面原語言
+          includedLanguages: 'en,es,fr,de,it,zh-CN,ja,ko,th,vi,my,zh-TW,id,ms,ar,he,ru,tg,uk,hi,tr,pt,nl,is,fi,sv,no,ro,kk,bo,mn,la,fil,tl,el',  // 支援的翻譯語言（可擴展）
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        }, 'google_translate_element');
+      }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <p>點擊上方的語言選單以切換語言</p>
+  </div>
+  <a href="index.html" target="_blank" style="text-decoration: underline">回本GitHub Pages專案首頁</a>
+  <header>
+    <h1>黎凡特世界觀開發備忘錄</h1>
+    <p><strong>主題：</strong> 歷史時間軸塌陷（Historical Timeline Collapse）的成因與 C++ 遊戲引擎開發策略</p>
+  </header>
+
+  <section>
+    <h2>一、 現象核心：為何相差千年的故事給人「同年代感」？</h2>
+    <p>不論是西元前 13 世紀的摩西出埃及、西元元年的耶穌時代、十世紀女主角誕生、甚至是 12 世紀末的《刺客教條》，大眾在螢幕上常產生這些時代高度重疊的錯覺。此現象在認知心理學與影視美學中被稱為<span class="highlight">「遠古同質化（Ancient Homogeneity）」</span>，主要由以下現實因素交織而成：</p>
+
+    <ul>
+      <li><strong>地理氣候與超長效靜態建築：</strong> 黎凡特地區（Levant）因乾燥、烈日、缺乏木材，其建築本質在數千年間皆以<span class="highlight">「直角分明、土黃色、低矮平頂的泥磚或石材方塊房」</span>為主。缺乏劇烈的工業革命視覺變化，導致大腦失去辨識精確年份的坐標。</li>
+      <li><strong>生產力工具的停滯感：</strong> 在工業革命前，人類日常使用的物件（如黏土橄欖油燈、粗布斗篷、水井、代步的駱駝與驢子）形狀與功能重疊度高達 90%。</li>
+    </ul>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/4afYKM63IKA?si=hW5Kae0YQs_5Qult" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/-4Gnxsjyy6Y?si=gwD-Zef0Oxo2dfrI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/ZmrJemUzbBs?si=jUg9o4yT6mCmP7Um" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/YWDSGSHPz4Y?si=BhRVPhh1CBGTg3Vy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/NglaUZ2au8g?si=hW4LasRFjXAZWJjH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div class="blockquote">
+      <strong>【世界觀核心科幻補丁】：</strong><br>
+      此現象在本作中得到最硬核的科幻合理解釋——這並非人類文明的自然停滯，而是外星殖民者<span class="highlight">耶和華（Y-H-W-H）實施的「科技鎖死（Technology Lock）」</span>。祂為了防止地球土著發展出科學並看穿其外星本質，刻意將黎凡特專區（Sector Levant）的生產力禁錮在低階農耕與泥磚監獄中長達數千年。
+    </div>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>二、 現實與影視中的「時間塌陷」經典案例</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>歷史真實跨度</th>
+        <th>大眾螢幕錯覺（同年代感）</th>
+        <th>世界觀科幻解構</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><strong>埃及艷后 vs 建造金字塔</strong><br>相差約 2500 年（艷后距離現代 2026 年更近）</td>
+        <td>影視劇中常將兩者揉合為同一個「古埃及背景」</td>
+        <td>外星總督對北非實驗室的長期靜態圈養。</td>
+      </tr>
+      <tr>
+        <td><strong>《I am Jesus Christ》(2026) vs 《刺客教條 1》</strong><br>相差近 1200 年（西元 1 世紀 vs 12 世紀末）</td>
+        <td>兩款遊戲在 PC 平台上呈現的中東窄巷、黃土景觀視覺極度相似</td>
+        <td>耶和華的「大結構美術資產」在該專區無限重複使用。</td>
+      </tr>
+      </tbody>
+    </table>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/VCFVhc-lcU4?si=oPLeDK268l6bLXhL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/3RS6waLl9oM?si=VWUrdh6B0mqGiiBr" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/M21atFuLMqg?si=5dWB5IibAizhtHCa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/JsagVpQV2Sc?si=fpvqTEC77QmsTiO-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <br>
+    <iframe loading="lazy" width="560" height="315" src="https://www.youtube.com/embed/nApTCI4vUHo?si=XM0rlsd-5zoucRgg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>三、 3A 級遊戲開發策略：「宏觀同質，微觀差異」</h2>
+    <p>大眾的大腦認知盲區，正好為 3A 遊戲開發提供了完美的<span class="highlight">效能優化與商業變現</span>契機。我們不需要在每一幀畫面去重新發明輪子，而是要把細節精準花在刀口上：</p>
+
+    <h3>1. 宏觀（Macro）：極致的記憶體優化（Asset Reuse）</h3>
+    <p>利用黎凡特建築千篇一律的特性，美術團隊只需建立一組頂級質感的「直角泥磚牆、平屋頂、黃土路面」4K 材質球與靜態網格體（Static Mesh）。在 C++ 引擎中透過 <span class="code-annotation">Instanced Static Mesh (ISM)</span> 大量複製，能大幅壓低顯示卡記憶體（VRAM）消耗，讓遊戲在開放世界中跑出極高的 FPS。</p>
+
+    <h3>2. 微觀（Micro）：靠「歷史科技細節」砸出 3A 級身價</h3>
+    <p>要讓硬核玩家一眼看出本作設定在「十世紀內戰期的黎凡特」，必須在微觀物件（Props）上與西元元年的耶穌時代做出致命的細節區隔：</p>
+    <ul>
+      <li><strong>冶鐵與防具科技：</strong> 十世紀的拜占庭與阿拔斯帝國士兵不再穿著古羅馬式的簡單皮甲，而是穿著極其精密的<span class="highlight">鐵製鎖子甲（Mail Armor）</span>與<span class="highlight">片甲（Lamellar Armor）</span>。金屬碰撞與物理破壞的動態火花必須拉滿。</li>
+      <li><strong>貨幣與經濟系統：</strong> 玩家搜刮屍體或在市集交易時，獲得的不是羅馬銀幣，而是十世紀法蒂瑪王朝特有的、雕刻精美的<span class="highlight">黃金第納爾（Dinar）金幣</span>。</li>
+    </ul>
+
+    <h3>3. 核心視覺反差：隱藏在土黃色地表的「外星控制程式碼」</h3>
+    <p>當玩家操控 183 公分、不盲從父權的吸血鬼女主角開啟「吸血鬼視界」時，細節將全面爆發：</p>
+    <ul>
+      <li>看似普通的十世紀黃土泥磚牆，內部正流竄著隱隱泛著藍光、因像素雜訊而閃爍的<span class="highlight">外星超導體傳輸線</span>。</li>
+      <li>男主角（210 公分黑色墮天使）所畏懼的宗教聖地（如大教堂），其宏偉的幾何花磚與經文縫隙裡，正不斷向虛空發射干擾其體內防叛變後門（Kill Switch）的<span class="highlight">高頻微波粒子特效</span>。</li>
+    </ul>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>四、 開發結論</h2>
+    <p class="blockquote">
+      「大結構放過顯示卡，小細節驚豔硬核玩家。」<br><br>
+      我們不必驚慌於時代重疊的錯覺。只要把握住黎凡特自然的強烈明暗對比（Chiaroscuro），讓土黃色泥磚房成為最穩定的背景，再將精準的十世紀冶鐵細節、香料市集的鮮豔色彩、以及外星反烏托邦的科幻微波雜訊砸進微觀世界中，這款弒神大作絕對能兼顧引擎流暢度，並在商業與口碑上大獲成功，引爆全球話題！
+    </p>
+  </section>
+  <ul id="messages"></ul>
+  <div id="social-share" style="margin-top: 20px;">
+    <a id="fb-share" href="#" target="_blank" style="color: #4267B2; font-weight: bold;">分享到 Facebook</a>
+    <span> | </span>
+    <a id="line-share" href="#" target="_blank" style="color: #00C300; font-weight: bold;">分享到 Line</a>
+    <span> | </span>
+    <a id="twitter-share" href="#" target="_blank" style="color: #1DA1F2; font-weight: bold;">分享到 X</a>
+  </div>
+  <script>
+    var currentUrl = window.location.href;
+    document.getElementById("fb-share").href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(currentUrl);
+    document.getElementById("line-share").href = "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(currentUrl);
+    document.getElementById("twitter-share").href = "https://twitter.com/intent/tweet?url=" + encodeURIComponent(currentUrl) + "&text=開放世界NPC生成與角色設計架構";
+  </script>
+  <div id="fb-root"></div>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/zh_TW/sdk.js#xfbml=1&version=v17.0" nonce="yourNonce"></script>
+  <div class="fb-comments" data-href="https://chrischou19990904.github.io/harp_app_introduction" data-width="100%" data-numposts="5"></div>
+
+</div>
+
+</body>
+</html>
