@@ -82,8 +82,19 @@
 </div>
 <a href="index.html" target="_blank" style="text-decoration: underline">回本GitHub Pages專案首頁</a>
 <h1>開放世界 NPC 生成與角色設計架構</h1>
-
 <section>
+    <h2>目錄</h2>
+    隨便點選下方其中一個主題便能直接跳到該主題的說明區
+    <ol>
+        <li><a href="#section1">NPC 生成系統設計與效能防禦（Object Pooling）</a></li>
+        <li><a href="#section2">模組化角色隨機生成系統</a></li>
+        <li><a href="#section3">角色分層設計與審美主權（Hero vs NPC）</a></li>
+        <li><a href="#section4">案例對照：Gameloft《孤膽車神：維加斯》 vs Rockstar《俠盜獵車手 V》</a></li>
+        <li><a href="#section5">NPC 執法與生成流程示意圖</a></li>
+        <li><a href="#section6">技術權限總結</a></li>
+    </ol>
+</section>
+<section id="section1">
     <h2>一、NPC 生成系統設計與效能防禦（Object Pooling）</h2>
 
     <p>在本作 10 世紀黎凡特開放世界中，為實作<b>「全地圖古建築 100% 室內外無縫自由進出（Full Interior Accessibility）」</b>並拒絕空氣牆阻抗，系統摒棄了高負載的區域重置（Zone Reset）壞軌，全盤採用高級<b>「物件池（Object Pool）」動態串流機制</b>進行動態記憶體防禦（RAM Budget Control）。</p>
@@ -107,7 +118,7 @@
     </ul>
 </section>
 
-<section>
+<section id="section2">
     <h2>二、模組化角色隨機生成系統</h2>
 
     <p>為在滿足大眾審美觀（Modern Aesthetics）的同時優化美術資產，本作不堆砌死板的單一模型，而是採用<b>「分層模組化隨機權重組合方案」</b>。利用底層 Shader 控制環境變量，在有限資產下渲染出極高多樣性的人口密度。</p>
@@ -127,7 +138,7 @@
     </div>
 </section>
 
-<section>
+<section id="section3">
     <h2>三、角色分層設計與審美主權（Hero vs NPC）</h2>
 
     <p>遵從現代商業遊戲開發正典（借鑑《暮光之城》沃爾圖里領袖與《惡魔城》德古拉之審美重塑邏輯），本作將角色精度劃分為三個權限階級，將大眾市場審美視為最高開發主權：</p>
@@ -160,7 +171,7 @@
     </table>
 </section>
 
-<section>
+<section id="section4">
     <h2>四、案例對照：Gameloft《孤膽車神：維加斯》 vs Rockstar《俠盜獵車手 V》</h2>
 
     <p>透過解構兩款開放世界題材的 NPC 系統，能精準洞察手遊平台的「妥協壞軌」與 3A 正典的「技術差距」，進而論證本作定錨 10 世紀古代黎凡特的必然性：</p>
@@ -197,7 +208,7 @@
     </table>
 </section>
 
-<section>
+<section id="section5">
     <h2>五、NPC 執法與生成流程示意圖</h2>
     <p>下圖展示了不同架構在玩家觸發追捕（通緝系統）與日常生存時的底層運算邏輯：</p>
 
@@ -231,7 +242,7 @@
     </div>
 </section>
 
-<section>
+<section id="section6">
     <h2>六、技術權衡總結（Trade-off & Verification）</h2>
     <div class="box" style="border-left-color: #27ae60;">
         <p><b>技術總結：</b></p>
